@@ -13,10 +13,13 @@ from entities import Player
 
 
 class State:
-  def __init__(self, tilemap):
-    self.tilemap = tilemap
+  def __init__(self):
+    self.tilemap = None
     self.background = "black"
     self.images = []
+  
+  def set_tilemap(self, tilemap):
+    self.tilemap = tilemap
 
   def render(self):
     return {"background": self.background, "images": self.images}
@@ -29,6 +32,7 @@ users = {}
 entities = []
 done_state = {}
 tilemap = Tilemap(state)
+state.set_tilemap(tilemap)
 tilemap.set(Grass(), 0, -1)
 
 
