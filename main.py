@@ -61,15 +61,20 @@ def ticker():
       server.tilemap.render()
       server.background = "#16f4f7"
       usernames = []
+
       for entity in server.entities:
         if isinstance(entity, Player):
           usernames.append(entity.username)
         entity.frame()
         if entity.active:
           server.images.append(entity.render())
+
       for username in state.users.keys():
         if username not in usernames:
           server.entities.append(Player(server, 0, 2, state.users[username]))
+
+      for user in state.users.values():
+        user.frame()
 
       done_server = server.render()
       sleep(0.0001)

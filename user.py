@@ -23,8 +23,10 @@ class User:
     self.just_down = []
     self.camera = Camera()
   
+  def frame(self):
+    self.is_active = self.last_tick > time() - 1
+  
   def update(self, message):
-    self.is_active = self.last_tick > time() - 10
     self.last_tick = time()
     self.keys_down = message["keys_down"]
     self.just_down += message["just_down"]
