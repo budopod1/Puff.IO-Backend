@@ -81,19 +81,15 @@ class Player(Entity):
     self.active = self.user.is_active
     if self.active:
       just_down = self.user.get_just_down()
-      if just_down:
-        print(just_down, self.grounded_y)
 
       if "KeyW" in just_down and self.grounded_y:
-        self.yv += self.jump_power * self.server.state.time_delta
+        self.yv += self.jump_power
       
       if self.user.is_key_down("KeyD"):
         self.xv += self.move_power * self.server.state.time_delta
       
       if self.user.is_key_down("KeyA"):
         self.xv -= self.move_power * self.server.state.time_delta
-      
-      print(self.xv, self.yv)
       
       self.user.camera.x = self.x
       self.user.camera.y = self.y
