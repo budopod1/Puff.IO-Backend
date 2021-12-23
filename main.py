@@ -180,7 +180,7 @@ async def main(websocket, path):
         return
       
       await websocket.send(json.dumps({"type": "frame", "data": done_server, "camera": state.users[data["username"]].camera.render()}))
-  except (websockets.exceptions.ConnectionClosedOK, OSError):
+  except (websockets.exceptions.ConnectionClosedOK, OSError, websockets.exceptions.ConnectionClosedError):
     log.log(websocket, "Going away:", data["username"])
   except:
     log.error()
