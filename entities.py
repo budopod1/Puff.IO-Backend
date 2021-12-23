@@ -2,13 +2,14 @@ from image import Image
 
 
 class Entity:
-  def __init__(self, x, y):
+  def __init__(self, server, x, y):
+    self.server = server
     self.x = x
     self.y = y
     self.xv = 0
     self.yv = 0
     self.xg = 0
-    self.yg = -1
+    self.yg = -2.5
     self.grounded_x = False
     self.grounded_y = False
     self.active = True
@@ -20,17 +21,17 @@ class Entity:
       self.grounded_x = False
       self.grounded_y = False
 
-      self.xv += self.xg * time_delta
-      self.yv += self.yg * time_delta
+      self.xv += self.xg * self.server.state.time_delta
+      self.yv += self.yg * self.server.state.time_delta
 
-      x_change = self.xv * time_delta
+      x_change = self.xv * self.server.state.time_delta
       self.x += x_change
       if self.collides(self.x, self.y):
         self.x -= x_change
         self.xv = 0
         self.grounded_x = True
       
-      y_change = self.yv * time_delta
+      y_change = self.yv * self.server.state.time_delta
       self.y += y_change
       if self.collides(self.x, self.y):
         self.y -= y_change
@@ -40,7 +41,7 @@ class Entity:
   def collides(self, x, y):
     tiles = []
     for point in self.collide_points:
-      tile = tilemap.get(round(x + point[0]), round(y + point[1]))
+      tile = self.server.tilemap.get(round(x + point[0]), round(y + point[1]))
       if tile:
         tiles.append(tile)
     return tiles
@@ -53,12 +54,13 @@ class Entity:
 
 
 class Player(Entity):
-  def __init__(self, x, y, user):
-    super().__init__(x, y)
+  def __init__(self, server, x, y, user):
+    super().__init__(server, x, y)
     self.user = user
     self.username = user.username
     self.sprite = Image("puff")
-    self.jump_power = 2.5
+    self.jump_power = 3.5
+    self.move_power = 1
     self.collide_points = [
       (-0.5, 0.05),
       (0.5, 0.05),
@@ -76,7 +78,22 @@ class Player(Entity):
 
   def frame(self):
     super().frame()
-    self.active = users[self.username].is_active
+    self.active = self.user.is_active
     if self.active:
-      if "KeyW" in users[self.username].get_just_down():
-        self.yv += self.jump_power
+      just_down = self.user.get_just_down()
+      if just_down:
+        print(just_down, self.grounded_y)
+
+      if "KeyW" in just_down and self.grounded_y:
+        self.yv += self.jump_power * self.server.state.time_delta
+      
+      if self.user.is_key_down("KeyD"):
+        self.xv += self.move_power * self.server.state.time_delta
+      
+      if self.user.is_key_down("KeyA"):
+        self.xv -= self.move_power * self.server.state.time_delta
+      
+      print(self.xv, self.yv)
+      
+      self.user.camera.x = self.x
+      self.user.camera.y = self.y

@@ -2,13 +2,13 @@ from image import Image
 
 
 class Tilemap:
-  def __init__(self, state):
-    self.state = state
+  def __init__(self, server):
+    self.server = server
     self.tiles = {}
   
   def render(self):
     for pos, tile in self.tiles.items():
-      self.state.images.append(tile.render(*pos))
+      self.server.images.append(tile.render(*pos))
   
   def set(self, tile, x, y):
     self.tiles[(x, y)] = tile

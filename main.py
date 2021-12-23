@@ -14,52 +14,65 @@ from entities import Player
 
 class State:
   def __init__(self):
+    # Manage the global state off the whole MMO
+    self.time_delta = 0
+    self.last_tick = 0
+    self.users = {}
+  
+  def tick(self):
+    self.time_delta = perf_counter() - self.last_tick
+    self.last_tick = perf_counter()
+
+
+class Server:
+  def __init__(self, state):
+    # Manage a single server
+    self.state = state
     self.tilemap = None
     self.background = "black"
     self.images = []
   
   def set_tilemap(self, tilemap):
     self.tilemap = tilemap
+  
+  def tick(self):
+    self.images = []
+    self.background = "black"
 
   def render(self):
     return {"background": self.background, "images": self.images}
 
 
 state = State()
-last_tick = 0
-time_delta = 0
-users = {}
+server = Server(state)
 entities = []
-done_state = {}
-tilemap = Tilemap(state)
-state.set_tilemap(tilemap)
+done_server = {}
+tilemap = Tilemap(server)
+server.set_tilemap(tilemap)
 tilemap.set(Grass(), 0, -1)
 
 
 def ticker():
-  global done_state, state, time_delta, last_tick
+  global done_server
   try:
     log.log(None, "Game starting...")
     while True:
-      
-      time_delta = perf_counter() - last_tick
-      last_tick = perf_counter()
-
-      state = State()
+      state.tick()
+      server.tick()
       tilemap.render()
-      state.background = "#16f4f7"
+      server.background = "#16f4f7"
       usernames = []
       for entity in entities:
         if isinstance(entity, Player):
           usernames.append(entity.username)
         entity.frame()
         if entity.active:
-          state.images.append(entity.render())
-      for username in users.keys():
+          server.images.append(entity.render())
+      for username in state.users.keys():
         if username not in usernames:
-          entities.append(Player(0, 2, users[username]))
+          entities.append(Player(server, 0, 2, state.users[username]))
 
-      done_state = state.render()
+      done_server = server.render()
       sleep(0.0001)
   except:
     log.error()
@@ -90,8 +103,8 @@ async def main(websocket, path):
     username = data["username"]
     password = data["password"]
     if data["connnectType"] == "signin":
-      if username in users.keys():
-        user = users[username]
+      if username in state.users.keys():
+        user = state.users[username]
         if user.check(password.encode('utf8')):
           last_username = username
           last_password = password
@@ -102,12 +115,12 @@ async def main(websocket, path):
       else:
         message = "Username is not valid"
     elif data["connnectType"] == "signup":
-      if username not in users.keys():
+      if username not in state.users.keys():
         if 2 <= len(username) <= 20:
           if 8 <= len(password):
             if username == "LOG":
               log.log(websocket, "WARNING: Signup to account LOG!")
-            users[username] = User(username, password.encode('utf8'))
+            state.users[username] = User(username, password.encode('utf8'))
             last_username = username
             last_password = password
             log.log(websocket, "Signup successful into account:", username)
@@ -146,7 +159,7 @@ async def main(websocket, path):
       success = False
       message = "unkown error!"
       if data["username"] == last_username:
-        user = users[data["username"]]
+        user = state.users[data["username"]]
         if last_password == data["password"]:
           user.update(data)
           success = True
@@ -160,7 +173,7 @@ async def main(websocket, path):
         await websocket.close()
         return
       
-      await websocket.send(json.dumps({"type": "frame", "data": done_state, "camera": users[data["username"]].camera.render()}))
+      await websocket.send(json.dumps({"type": "frame", "data": done_server, "camera": state.users[data["username"]].camera.render()}))
   except (websockets.exceptions.ConnectionClosedOK, OSError):
     log.log(websocket, "Going away:", data["username"])
   except:

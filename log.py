@@ -54,9 +54,12 @@ def log_to_file(text):
 def write_db():
   global queue
   while True:
-    sleep(10)
-    if queue:
-      db["log"] += queue.pop() + "\n"
+    try:
+      sleep(10)
+      if queue:
+        db["log"] += queue.pop() + "\n"
+    except IndexError:
+      log(None, "Pop from empty list?", is_error=True)
 
 
 def read_from_file():
