@@ -80,9 +80,7 @@ class Player(Entity):
     super().frame()
     self.active = self.user.is_active and self.user.server == self.server
     if self.active:
-      just_down = self.user.get_just_down()
-
-      if "KeyW" in just_down and self.grounded_y:
+      if self.user.is_key_down("KeyW") and self.grounded_y:
         self.yv += self.jump_power
       
       if self.user.is_key_down("KeyD"):
