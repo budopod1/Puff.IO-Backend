@@ -31,6 +31,7 @@ class Server:
     self.tilemap = None
     self.background = "black"
     self.images = []
+    self.entities = []
   
   def set_tilemap(self, tilemap):
     self.tilemap = tilemap
@@ -45,11 +46,9 @@ class Server:
 
 state = State()
 server = Server(state)
-entities = []
 done_server = {}
-tilemap = Tilemap(server)
-server.set_tilemap(tilemap)
-tilemap.set(Grass(), 0, -1)
+server.set_tilemap(Tilemap(server))
+server.tilemap.set(Grass(), 0, -1)
 
 
 def ticker():
@@ -59,10 +58,10 @@ def ticker():
     while True:
       state.tick()
       server.tick()
-      tilemap.render()
+      server.tilemap.render()
       server.background = "#16f4f7"
       usernames = []
-      for entity in entities:
+      for entity in server.entities:
         if isinstance(entity, Player):
           usernames.append(entity.username)
         entity.frame()
@@ -70,7 +69,7 @@ def ticker():
           server.images.append(entity.render())
       for username in state.users.keys():
         if username not in usernames:
-          entities.append(Player(server, 0, 2, state.users[username]))
+          server.entities.append(Player(server, 0, 2, state.users[username]))
 
       done_server = server.render()
       sleep(0.0001)
