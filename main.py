@@ -124,7 +124,9 @@ async def main(websocket, path):
           if 8 <= len(password):
             if username == "LOG":
               log.log(websocket, "WARNING: Signup to account LOG!")
-            state.users[username] = User(username, password.encode('utf8'))
+            user = User(username, password.encode('utf8'))
+            user.change_server(server)
+            state.users[username] = user
             last_username = username
             last_password = password
             log.log(websocket, "Signup successful into account:", username)

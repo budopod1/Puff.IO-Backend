@@ -78,7 +78,7 @@ class Player(Entity):
 
   def frame(self):
     super().frame()
-    self.active = self.user.is_active
+    self.active = self.user.is_active and self.user.server == self.server
     if self.active:
       just_down = self.user.get_just_down()
 

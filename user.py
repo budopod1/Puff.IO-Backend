@@ -22,6 +22,10 @@ class User:
     self.keys_down = {}
     self.just_down = []
     self.camera = Camera()
+    self.server = None
+  
+  def change_server(self, server):
+    self.server = server
   
   def frame(self):
     self.is_active = self.last_tick > time() - 1
