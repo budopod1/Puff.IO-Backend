@@ -64,17 +64,12 @@ class Entity:
       "type": type(self).__name__,
       "active": self.active,
       "sprite": self.sprite.save(),
-      "server": self.server.uuid
+      "server": self.server
     }
   
   @classmethod
   def load(cls, state, data):
-    server = None
-    for server in state.servers:
-      if data["server"] == server.uuid:
-        server = server
-    
-    entity = cls(server, data["x"], data["y"])
+    entity = cls(data["server"], data["x"], data["y"])
     entity.active = data["active"]
     entity.sprite = Image.load(data["sprite"])
     entity.xv = data["xv"]
@@ -109,7 +104,7 @@ class Player(Entity):
 
   def frame(self):
     super().frame()
-    self.active = self.user.is_active and self.user.server == self.server
+    self.active = self.user.is_active and self.user.server.uuid == self.server
     if self.active:
       if self.user.is_key_down("KeyW") and self.grounded_y:
         self.yv += self.jump_power
@@ -148,3 +143,6 @@ class Player(Entity):
     entity.user = state.users[data["username"]]
 
     return entity
+
+
+ENTITY_TYPES = [Player, Entity]

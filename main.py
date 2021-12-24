@@ -9,12 +9,11 @@ from threading import Thread
 import log
 from user import User
 from tiles import Tilemap, Grass
-from entities import Player, Entity
+from entities import Player
 from server import Server
 from state import State
 
 
-ENTITY_TYPES = [Player, Entity]
 state = State()
 server = Server(state)
 state.add_server(server)
@@ -30,7 +29,7 @@ def ticker():
     while True:
       state.tick()
       server.tick()
-      server.tilemap.render()
+      server.images += server.tilemap.render()
       server.background = "#16f4f7"
       usernames = []
 
@@ -43,7 +42,7 @@ def ticker():
 
       for username in state.users.keys():
         if username not in usernames:
-          server.entities.append(Player(server, 0, 2, state.users[username]))
+          server.entities.append(Player(server.uuid, 0, 2, state.users[username]))
 
       for user in state.users.values():
         user.frame()
