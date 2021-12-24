@@ -17,6 +17,7 @@ from state import State
 ENTITY_TYPES = [Player, Entity]
 state = State()
 server = Server(state)
+state.add_server(server)
 done_servers = {}
 server.set_tilemap(Tilemap(server))
 server.tilemap.set(Grass(), 0, -1)

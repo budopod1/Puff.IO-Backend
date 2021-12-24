@@ -68,9 +68,9 @@ class Entity:
     }
   
   @classmethod
-  def load(cls, servers, data):
+  def load(cls, state, data):
     server = None
-    for server in servers:
+    for server in state.servers:
       if data["server"] == server.uuid:
         server = server
     
@@ -87,7 +87,7 @@ class Player(Entity):
   def __init__(self, server, x, y, user=None):
     super().__init__(server, x, y)
     self.user = user
-    self.username = user.username
+    self.username = user.username if user else None
     self.sprite = Image("puff")
     self.jump_power = 3.5
     self.move_power = 1
@@ -138,7 +138,13 @@ class Player(Entity):
       "username": self.user.username
     })
 
-    return enity
+    return entity
   
   @classmethod
-  def load(self):
+  def load(cls, state, data):
+    entity = super().load(state, data)
+
+    entity.username = data["username"]
+    entity.user = state.users[data["username"]]
+
+    return entity
