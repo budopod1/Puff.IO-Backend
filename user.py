@@ -44,3 +44,5 @@ class User:
   def get_just_down(self):
     self.just_down, jd = [], self.just_down
     return jd
+  
+  def save(self)
