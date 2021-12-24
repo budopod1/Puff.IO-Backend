@@ -18,7 +18,7 @@ class User:
     self.username = username
     self.password = get_hashed_password(password)
     self.last_tick = time()
-    self.is_active = True
+    self.is_active = False
     self.keys_down = {}
     self.just_down = []
     self.camera = Camera()
@@ -45,4 +45,10 @@ class User:
     self.just_down, jd = [], self.just_down
     return jd
   
-  def save(self)
+  def save(self):
+    return {
+      "server": self.server.uuid,
+      "camera": self.camera.save(),
+      "username": self.username,
+      "password": self.password
+    }
