@@ -2,51 +2,22 @@ import asyncio
 import websockets
 import websockets.exceptions
 import json
-from time import perf_counter, sleep
+from time import sleep
 from random import random
 from threading import Thread
 
 import log
 from user import User
 from tiles import Tilemap, Grass
-from entities import Player
+from entities import Player, Entity
+from server import Server
+from state import State
 
 
-class State:
-  def __init__(self):
-    # Manage the global state off the whole MMO
-    self.time_delta = 0
-    self.last_tick = 0
-    self.users = {}
-  
-  def tick(self):
-    self.time_delta = perf_counter() - self.last_tick
-    self.last_tick = perf_counter()
-
-
-class Server:
-  def __init__(self, state):
-    # Manage a single server
-    self.state = state
-    self.tilemap = None
-    self.background = "black"
-    self.images = []
-    self.entities = []
-  
-  def set_tilemap(self, tilemap):
-    self.tilemap = tilemap
-  
-  def tick(self):
-    self.images = []
-    self.background = "black"
-
-  def render(self):
-    return {"background": self.background, "images": self.images}
-
-
+ENTITY_TYPES = [Player, Entity]
 state = State()
 server = Server(state)
-done_server = {}
+done_servers = {}
 server.set_tilemap(Tilemap(server))
 server.tilemap.set(Grass(), 0, -1)
 
@@ -76,7 +47,7 @@ def ticker():
       for user in state.users.values():
         user.frame()
 
-      done_server = server.render()
+      done_servers[server] = server.render()
       sleep(0.0001)
   except:
     log.error()
@@ -179,7 +150,14 @@ async def main(websocket, path):
         await websocket.close()
         return
       
-      await websocket.send(json.dumps({"type": "frame", "data": done_server, "camera": state.users[data["username"]].camera.render()}))
+      user = state.users[data["username"]]
+      camera = user.camera.render()
+      done_server = done_servers[user.server]
+      await websocket.send(json.dumps({
+        "type": "frame",
+        "data": done_server,
+        "camera": camera
+      }))
   except (websockets.exceptions.ConnectionClosedOK, OSError, websockets.exceptions.ConnectionClosedError):
     log.log(websocket, "Going away:", data["username"])
   except:

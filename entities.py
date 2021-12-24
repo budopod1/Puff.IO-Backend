@@ -50,17 +50,48 @@ class Entity:
     return self.sprite.render(self.x, self.y)
   
   def __repr__(self):
-    return f"{type(self).__name__} @ ({self.x}, {self.y})" 
+    return f"{type(self).__name__} @ ({self.x}, {self.y})"
+  
+  def __str__(self):
+    return self.__repr__()
+  
+  def save(self):
+    return {
+      "xv": self.xv,
+      "yv": self.yv,
+      "x": self.x,
+      "y": self.y,
+      "type": type(self).__name__,
+      "active": self.active,
+      "sprite": self.sprite.save(),
+      "server": self.server.uuid
+    }
+  
+  @classmethod
+  def load(cls, servers, data):
+    server = None
+    for server in servers:
+      if data["server"] == server.uuid:
+        server = server
+    
+    entity = cls(server, data["x"], data["y"])
+    entity.active = data["active"]
+    entity.sprite = Image.load(data["sprite"])
+    entity.xv = data["xv"]
+    entity.yv = data["yv"]
+
+    return entity
 
 
 class Player(Entity):
-  def __init__(self, server, x, y, user):
+  def __init__(self, server, x, y, user=None):
     super().__init__(server, x, y)
     self.user = user
     self.username = user.username
     self.sprite = Image("puff")
     self.jump_power = 3.5
     self.move_power = 1
+    self.ground_power = 2
     self.collide_points = [
       (-0.5, 0.05),
       (0.5, 0.05),
@@ -83,11 +114,31 @@ class Player(Entity):
       if self.user.is_key_down("KeyW") and self.grounded_y:
         self.yv += self.jump_power
       
+      move_speed = self.move_power * self.server.state.time_delta
+      if self.ground_power:
+        move_speed *= self.ground_power
+
       if self.user.is_key_down("KeyD"):
-        self.xv += self.move_power * self.server.state.time_delta
+        self.xv += move_speed
       
       if self.user.is_key_down("KeyA"):
-        self.xv -= self.move_power * self.server.state.time_delta
+        self.xv -= move_speed
+      
+      if self.user.is_key_down("KeyS"):
+        self.xv = 0
+        self.yv = -5
       
       self.user.camera.x = self.x
       self.user.camera.y = self.y
+  
+  def save(self):
+    entity = super().save()
+
+    entity.update({
+      "username": self.user.username
+    })
+
+    return enity
+  
+  @classmethod
+  def load(self):

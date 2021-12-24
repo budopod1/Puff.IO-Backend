@@ -38,7 +38,7 @@ def log(websocket, *messages, is_error=False):
 
   output = message if is_error else f"{address} - [{now}] {message}"
   if is_error:
-    sys.stderr.write(output)
+    print(output, file=sys.stderr)
     log_to_file(output[:-1])
   else:
     log_to_file(output)
