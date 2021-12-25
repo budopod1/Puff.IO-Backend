@@ -18,7 +18,7 @@ state = State()
 server = Server(state)
 state.add_server(server)
 done_servers = {}
-server.set_tilemap(Tilemap(server))
+server.set_tilemap(Tilemap())
 server.tilemap.set(Grass(), 0, -1)
 
 

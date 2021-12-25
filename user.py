@@ -52,3 +52,13 @@ class User:
       "username": self.username,
       "password": self.password
     }
+  
+  @classmethod
+  def load(cls, state, data):
+    user = cls(data["username"], "")
+    user.password = data["password"]
+    user.camera = Camera.load(data["camera"])
+    for server in state.servers:
+      if server.uuid == data["server"]:
+        user.server = server
+    return user
