@@ -18,6 +18,11 @@ class State:
     self.time_delta = perf_counter() - self.last_tick
     self.last_tick = perf_counter()
   
+  def get_server(self, uuid):
+    for server in self.servers:
+      if server.uuid == uuid:
+        return server
+  
   def save(self):
     return {
       "servers": [server.save() for server in self.servers],

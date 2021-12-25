@@ -6,7 +6,7 @@ from entities import ENTITY_TYPES
 class Server:
   def __init__(self, state):
     # Manage a single server
-    self.uuid = uuid()
+    self.uuid = str(uuid())
     self.state = state
     self.tilemap = None
     self.background = "#000000"

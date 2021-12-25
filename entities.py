@@ -2,8 +2,9 @@ from image import Image
 
 
 class Entity:
-  def __init__(self, server, x, y):
+  def __init__(self, server, state, x, y):
     self.server = server
+    self.state = state
     self.x = x
     self.y = y
     self.xv = 0
@@ -21,17 +22,17 @@ class Entity:
       self.grounded_x = False
       self.grounded_y = False
 
-      self.xv += self.xg * self.server.state.time_delta
-      self.yv += self.yg * self.server.state.time_delta
+      self.xv += self.xg * self.state.time_delta
+      self.yv += self.yg * self.state.time_delta
 
-      x_change = self.xv * self.server.state.time_delta
+      x_change = self.xv * self.state.time_delta
       self.x += x_change
       if self.collides(self.x, self.y):
         self.x -= x_change
         self.xv = 0
         self.grounded_x = True
       
-      y_change = self.yv * self.server.state.time_delta
+      y_change = self.yv * self.state.time_delta
       self.y += y_change
       if self.collides(self.x, self.y):
         self.y -= y_change
@@ -39,9 +40,10 @@ class Entity:
         self.grounded_y = True
   
   def collides(self, x, y):
+    tilemap = self.state.get_server(self.server).tilemap
     tiles = []
     for point in self.collide_points:
-      tile = self.server.tilemap.get(round(x + point[0]), round(y + point[1]))
+      tile = tilemap.get(round(x + point[0]), round(y + point[1]))
       if tile:
         tiles.append(tile)
     return tiles
@@ -69,7 +71,7 @@ class Entity:
   
   @classmethod
   def load(cls, state, data):
-    entity = cls(data["server"], data["x"], data["y"])
+    entity = cls(data["server"], state, data["x"], data["y"])
     entity.active = data["active"]
     entity.sprite = Image.load(data["sprite"])
     entity.xv = data["xv"]
@@ -79,8 +81,8 @@ class Entity:
 
 
 class Player(Entity):
-  def __init__(self, server, x, y, user=None):
-    super().__init__(server, x, y)
+  def __init__(self, server, state, x, y, user=None):
+    super().__init__(server, state, x, y)
     self.user = user
     self.username = user.username if user else None
     self.sprite = Image("puff")
@@ -109,7 +111,7 @@ class Player(Entity):
       if self.user.is_key_down("KeyW") and self.grounded_y:
         self.yv += self.jump_power
       
-      move_speed = self.move_power * self.server.state.time_delta
+      move_speed = self.move_power * self.state.time_delta
       if self.ground_power:
         move_speed *= self.ground_power
 

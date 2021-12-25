@@ -5,8 +5,6 @@ from replit import db
 from threading import Thread
 from time import sleep
 
-# db["setup"] = False
-
 queue = []
 queue_thread = None
 
@@ -16,10 +14,10 @@ is_db_setup = False
 def setup_db():
   global is_db_setup, queue_thread
   try:
-    if not db["setup"]:
+    if not db["setup_log"]:
       raise Exception()
   except:
-    db["setup"] = True
+    db["setup_log"] = True
     db["log"] = ""
   queue_thread = Thread(target=write_db)
   queue_thread.start()

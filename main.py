@@ -22,6 +22,9 @@ server.set_tilemap(Tilemap())
 server.tilemap.set(Grass(), 0, -1)
 
 
+done_servers = {}
+
+
 def ticker():
   global done_server
   try:
@@ -42,7 +45,8 @@ def ticker():
 
       for username in state.users.keys():
         if username not in usernames:
-          server.entities.append(Player(server.uuid, 0, 2, state.users[username]))
+          new_player = Player(server.uuid, state, 0, 2, state.users[username])
+          server.entities.append(new_player)
 
       for user in state.users.values():
         user.frame()
@@ -128,7 +132,7 @@ async def main(websocket, path):
     while True:
       data = json.loads(await websocket.recv())
       if set(data.keys()) != {"username", "password", "keys_down", "just_down"}:
-        log.log(websocket, f"Message corrupt: '{data}'")
+        log.log(websocket, "Message corrupt")
         await websocket.send(json.dumps({"type": "error", "data": "Message corrupt"}))
         await websocket.close()
         return
