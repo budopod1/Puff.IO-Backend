@@ -36,3 +36,4 @@ class State:
       state.add_server(Server.load(state, server))
     for username, user in data["users"].items():
       state.users[username] = User.load(state, user)
+    return state

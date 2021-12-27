@@ -7,21 +7,12 @@ from random import random
 from threading import Thread
 
 import log
+from save import load_state, main_server
 from user import User
-from tiles import Tilemap, Grass
 from entities import Player
-from server import Server
-from state import State
 
 
-state = State()
-main_server = Server(state)
-state.add_server(main_server)
-main_server.set_tilemap(Tilemap())
-main_server.tilemap.set(Grass(), 0, -1)
-done_servers = {}
-
-
+state = load_state()
 done_servers = {}
 
 

@@ -35,7 +35,7 @@ class Tilemap:
     for tile in data:
       tile_class = None
       for tile_type in TILE_TYPES:
-        if data["type"] == tile_type.__name__:
+        if tile["type"] == tile_type.__name__:
           tile_class = tile_type
       tilemap.set(tile_class.load(tile["data"]), *tile["position"])
     return tilemap
