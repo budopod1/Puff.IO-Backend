@@ -15,11 +15,11 @@ from state import State
 
 
 state = State()
-server = Server(state)
-state.add_server(server)
+main_server = Server(state)
+state.add_server(main_server)
+main_server.set_tilemap(Tilemap())
+main_server.tilemap.set(Grass(), 0, -1)
 done_servers = {}
-server.set_tilemap(Tilemap())
-server.tilemap.set(Grass(), 0, -1)
 
 
 done_servers = {}
@@ -27,34 +27,35 @@ done_servers = {}
 
 def ticker():
   global done_server
-  try:
-    log.log(None, "Game starting...")
-    while True:
-      state.tick()
-      server.tick()
-      server.images += server.tilemap.render()
-      server.background = "#16f4f7"
-      usernames = []
+  log.log(None, "Game starting...")
+  while True:
+    try:
+      for server in state.servers:
+        state.tick()
+        server.tick()
+        server.images += server.tilemap.render()
+        server.background = "#16f4f7"
+        usernames = []
 
-      for entity in server.entities:
-        if isinstance(entity, Player):
-          usernames.append(entity.username)
-        entity.frame()
-        if entity.active:
-          server.images.append(entity.render())
+        for entity in server.entities:
+          if isinstance(entity, Player):
+            usernames.append(entity.username)
+          entity.frame()
+          if entity.active:
+            server.images.append(entity.render())
 
-      for username in state.users.keys():
-        if username not in usernames:
-          new_player = Player(server.uuid, state, 0, 2, state.users[username])
-          server.entities.append(new_player)
+        for username in state.users.keys():
+          if username not in usernames:
+            new_player = Player(server.uuid, state, 0, 2, state.users[username])
+            server.entities.append(new_player)
 
-      for user in state.users.values():
-        user.frame()
+        for user in state.users.values():
+          user.frame()
 
-      done_servers[server] = server.render()
-      sleep(0.0001)
-  except:
-    log.error()
+        done_servers[server] = server.render()
+        sleep(0.0001)
+    except:
+      log.error()
 
 
 async def main(websocket, path):
@@ -100,7 +101,7 @@ async def main(websocket, path):
             if username == "LOG":
               log.log(websocket, "WARNING: Signup to account LOG!")
             user = User(username, password.encode('utf8'))
-            user.change_server(server)
+            user.change_server(main_server)
             state.users[username] = user
             last_username = username
             last_password = password
