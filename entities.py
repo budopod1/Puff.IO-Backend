@@ -128,6 +128,9 @@ class Player(Entity):
       
       self.user.camera.x = self.x
       self.user.camera.y = self.y
+
+      camera_size = self.user.camera.size
+      self.server.tilemap.view(self.x, self.y, camera_size, camera_size * 3)
   
   def save(self):
     entity = super().save()

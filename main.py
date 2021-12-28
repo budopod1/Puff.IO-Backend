@@ -10,18 +10,34 @@ import log
 from save import load_state, save_state
 from user import User
 from entities import Player
+from database import download_database, upload_continuously, database_shutdown, upload_database
 
-
-state = load_state()
+event_loop = None
+shutdown = False
+state = None
 done_servers = {}
 
 
+def do_shutdown():
+  global shutdown
+  input()
+  log.log(None, "Shutting down...")
+  save_state(state)
+  upload_database()
+  database_shutdown()
+  log.log_shutdown()
+  event_loop.stop()
+  shutdown = True
+
+
 def ticker():
-  global done_server, done_state
+  global done_server
   log.log(None, "Game starting...")
   is_first = True
   try:
     while True:
+      if shutdown:
+        return
       state.tick()
       if is_first:
         is_first = False
@@ -55,6 +71,8 @@ def ticker():
 
 def save_continuously():
   while True:
+    if shutdown:
+      return
     save_state(state)
     sleep(10)
 
@@ -171,15 +189,23 @@ async def main(websocket, path):
 
 
 def start():
+  global event_loop
   log.log(None, "Server starting...")
   start_server = websockets.serve(main, '0.0.0.0', 5678)
-  asyncio.get_event_loop().run_until_complete(start_server)
-  asyncio.get_event_loop().run_forever()
+  event_loop = asyncio.get_event_loop()
+  event_loop.run_until_complete(start_server)
+  event_loop.run_forever()
 
 
 if __name__ == "__main__":
+  download_database()
+  upload_continuously()
+  state = load_state()
   ticker_thread = Thread(target=ticker)
   ticker_thread.start()
   save_thread = Thread(target=save_continuously)
   save_thread.start()
+  shutdown_thread = Thread(target=do_shutdown)
+  shutdown_thread.start()
+  log.log(None, "Press enter to stop")
   start()

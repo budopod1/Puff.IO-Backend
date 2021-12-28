@@ -1,24 +1,29 @@
 from datetime import datetime
 import sys
 import traceback
-from replit import db
 from threading import Thread
 from time import sleep
+from database import db
 
 queue = []
 queue_thread = None
-
+_shutdown = False
 is_db_setup = False
+
+
+def log_shutdown():
+  global _shutdown
+  _shutdown = True
 
 
 def setup_db():
   global is_db_setup, queue_thread
   try:
-    if not db["setup_log"]:
+    if not db()["setup_log"]:
       raise Exception()
   except:
-    db["setup_log"] = True
-    db["log"] = ""
+    db()["setup_log"] = True
+    db()["log"] = ""
   queue_thread = Thread(target=write_db)
   queue_thread.start()
   is_db_setup = True
@@ -52,16 +57,18 @@ def log_to_file(text):
 def write_db():
   global queue
   while True:
+    if _shutdown:
+      break
     try:
       sleep(10)
       if queue:
-        db["log"] += queue.pop() + "\n"
+        db()["log"] += queue.pop() + "\n"
     except IndexError:
       log(None, "Pop from empty list?", is_error=True)
 
 
 def read_from_file():
-  return db["log"]
+  return db()["log"]
 
 
 def error():

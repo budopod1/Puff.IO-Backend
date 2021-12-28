@@ -29,6 +29,11 @@ class Tilemap:
       for position, tile in self.tiles.items()
     ]
   
+  def view(self, x, y, xd, yd):
+    for x in range(x - xd, x + xd + 1):
+      for y in range(y - yd, y + yd + 1):
+        self.get(x, y)
+  
   @classmethod
   def load(cls, data):
     tilemap = cls()
