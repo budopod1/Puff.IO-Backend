@@ -7,7 +7,7 @@ from random import random
 from threading import Thread
 
 import log
-from save import load_state, main_server
+from save import load_state, save_state
 from user import User
 from entities import Player
 
@@ -17,12 +17,16 @@ done_servers = {}
 
 
 def ticker():
-  global done_server
+  global done_server, done_state
   log.log(None, "Game starting...")
-  while True:
-    try:
+  is_first = True
+  try:
+    while True:
+      state.tick()
+      if is_first:
+        is_first = False
+        continue
       for server in state.servers:
-        state.tick()
         server.tick()
         server.images += server.tilemap.render()
         server.background = "#16f4f7"
@@ -45,8 +49,14 @@ def ticker():
 
         done_servers[server] = server.render()
         sleep(0.0001)
-    except:
-      log.error()
+  except:
+    log.error()
+
+
+def save_continuously():
+  while True:
+    save_state(state)
+    sleep(10)
 
 
 async def main(websocket, path):
@@ -91,8 +101,8 @@ async def main(websocket, path):
           if 8 <= len(password):
             if username == "LOG":
               log.log(websocket, "WARNING: Signup to account LOG!")
-            user = User(username, password.encode('utf8'))
-            user.change_server(main_server)
+            user = User(state, username, password.encode('utf8'))
+            user.change_server(state.servers[0])
             state.users[username] = user
             last_username = username
             last_password = password
@@ -170,4 +180,6 @@ def start():
 if __name__ == "__main__":
   ticker_thread = Thread(target=ticker)
   ticker_thread.start()
+  save_thread = Thread(target=save_continuously)
+  save_thread.start()
   start()

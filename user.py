@@ -6,23 +6,25 @@ from camera import Camera
 def get_hashed_password(plain_text_password):
     # Hash a password for the first time
     #   (Using bcrypt, the salt is saved into the hash itself)
-    return bcrypt.hashpw(plain_text_password, bcrypt.gensalt())
+    return bcrypt.hashpw(plain_text_password, bcrypt.gensalt()).decode("UTF-8")
 
 def check_password(plain_text_password, hashed_password):
     # Check hashed password. Using bcrypt, the salt is saved into the hash itself
-    return bcrypt.checkpw(plain_text_password, hashed_password)
+    return bcrypt.checkpw(plain_text_password, hashed_password.encode("UTF-8"))
 
 
 class User:
-  def __init__(self, username, password):
+  def __init__(self, state, username, password):
+    self.state = state
     self.username = username
     self.password = get_hashed_password(password)
-    self.last_tick = time()
+    self.last_tick = 0
     self.is_active = False
     self.keys_down = {}
     self.just_down = []
     self.camera = Camera()
     self.server = None
+    self.server_uuid = None
   
   def change_server(self, server):
     self.server = server
@@ -55,10 +57,11 @@ class User:
   
   @classmethod
   def load(cls, state, data):
-    user = cls(data["username"], "")
+    user = cls(state, data["username"], b"this is insucure!")
     user.password = data["password"]
     user.camera = Camera.load(data["camera"])
-    for server in state.servers:
-      if server.uuid == data["server"]:
-        user.server = server
+    user.server_uuid = data["server"]
     return user
+  
+  def load_server(self):
+    self.server = self.state.get_server(self.server_uuid)

@@ -32,8 +32,10 @@ class State:
   @classmethod
   def load(cls, data):
     state = cls()
-    for server in data["servers"]:
-      state.add_server(Server.load(state, server))
     for username, user in data["users"].items():
       state.users[username] = User.load(state, user)
+    for server in data["servers"]:
+      state.add_server(Server.load(state, server))
+    for username, user in state.users.items():
+      user.load_server()
     return state

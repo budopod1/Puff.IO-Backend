@@ -83,6 +83,7 @@ class Entity:
 class Player(Entity):
   def __init__(self, server, state, x, y, user=None):
     super().__init__(server, state, x, y)
+    self.active = False
     self.user = user
     self.username = user.username if user else None
     self.sprite = Image("puff")
@@ -105,8 +106,8 @@ class Player(Entity):
     ]
 
   def frame(self):
-    super().frame()
     self.active = self.user.is_active and self.user.server.uuid == self.server
+    super().frame()
     if self.active:
       if self.user.is_key_down("KeyW") and self.grounded_y:
         self.yv += self.jump_power
