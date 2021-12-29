@@ -57,7 +57,7 @@ def ticker():
 
         for username in state.users.keys():
           if username not in usernames:
-            new_player = Player(server.uuid, state, 0, 2, state.users[username])
+            new_player = Player(server.uuid, state, 0, 10, state.users[username])
             server.entities.append(new_player)
 
         for user in state.users.values():

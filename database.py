@@ -52,4 +52,4 @@ def reset_database():
       del _db[key]
 
 
-# reset_database()
+reset_database()

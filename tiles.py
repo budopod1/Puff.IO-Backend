@@ -1,51 +1,6 @@
 from image import Image
 
 
-class Tilemap:
-  def __init__(self):
-    self.tiles = {}
-  
-  def render(self):
-    images = []
-    for pos, tile in self.tiles.items():
-      images.append(tile.render(*pos))
-    return images
-  
-  def set(self, tile, x, y):
-    self.tiles[(x, y)] = tile
-
-  def get(self, x, y):
-    if (x, y) not in self.tiles:
-      return None
-    return self.tiles[(x, y)]
-  
-  def save(self):
-    return [
-      {
-        "position": list(position),
-        "type": type(tile).__name__,
-        "data": tile.save()
-      }
-      for position, tile in self.tiles.items()
-    ]
-  
-  def view(self, x, y, xd, yd):
-    for x in range(x - xd, x + xd + 1):
-      for y in range(y - yd, y + yd + 1):
-        self.get(x, y)
-  
-  @classmethod
-  def load(cls, data):
-    tilemap = cls()
-    for tile in data:
-      tile_class = None
-      for tile_type in TILE_TYPES:
-        if tile["type"] == tile_type.__name__:
-          tile_class = tile_type
-      tilemap.set(tile_class.load(tile["data"]), *tile["position"])
-    return tilemap
-
-
 class Tile:
   def __init__(self):
     self.sprite = Image("error")

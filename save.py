@@ -1,7 +1,7 @@
 from database import db
 from state import State
 from server import Server
-from tiles import Tilemap, Grass
+from tilemap import Tilemap
 
 # db()["setup"] = False
 
@@ -29,6 +29,5 @@ def save_state(state):
 def setup_server(state):
   server = Server(state)
   server.set_tilemap(Tilemap())
-  server.tilemap.set(Grass(), 0, -1)
   return server
     

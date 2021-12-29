@@ -1,5 +1,5 @@
 from uuid import uuid4 as uuid
-from tiles import Tilemap
+from tilemap import Tilemap
 from entities import ENTITY_TYPES
 
 

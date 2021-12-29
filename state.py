@@ -18,6 +18,9 @@ class State:
     self.time_delta = perf_counter() - self.last_tick
     self.last_tick = perf_counter()
   
+  def fps(self):
+    return 1 / self.time_delta
+  
   def get_server(self, uuid):
     for server in self.servers:
       if server.uuid == uuid:

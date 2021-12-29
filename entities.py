@@ -91,10 +91,10 @@ class Player(Entity):
     self.move_power = 1
     self.ground_power = 2
     self.collide_points = [
-      (-0.5, 0.05),
-      (0.5, 0.05),
-      (-0.5, -0.05),
-      (0.5, -0.05),
+      (-0.45, 0.05),
+      (0.45, 0.05),
+      (-0.45, -0.05),
+      (0.45, -0.05),
       (-0.3535, -0.3535),
       (-0.3535, 0.3535),
       (0.3535, 0.3535),
@@ -125,12 +125,12 @@ class Player(Entity):
       if self.user.is_key_down("KeyS"):
         self.xv = 0
         self.yv = -5
+
+      camera_size = self.user.camera.size
+      self.state.get_server(self.server).tilemap.view(self.x, self.y, camera_size, camera_size * 3)
       
       self.user.camera.x = self.x
       self.user.camera.y = self.y
-
-      camera_size = self.user.camera.size
-      self.server.tilemap.view(self.x, self.y, camera_size, camera_size * 3)
   
   def save(self):
     entity = super().save()
