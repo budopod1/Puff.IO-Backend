@@ -35,7 +35,7 @@ class Tilemap:
         "type": type(tile).__name__,
         "data": tile.save()
       }
-      for position, tile in self.tiles.items()
+      for position, tile in self.tiles.copy().items()
       if tile
     ]
   
