@@ -149,7 +149,12 @@ async def main(websocket, path):
       return
 
     # Main server websocket loop
+    frame = 0
     while True:
+      frame += 1
+      if shutdown:
+        return
+
       data = json.loads(await websocket.recv())
       if set(data.keys()) != {"username", "password", "keys_down", "just_down"}:
         log.log(websocket, "Message corrupt")
@@ -177,12 +182,13 @@ async def main(websocket, path):
       user = state.users[data["username"]]
       camera = user.camera
       done_server = done_servers[user.server]
-      response = json.dumps({
+      response = {
         "type": "frame",
-        "data": camera.proccess(done_server),
         "camera": camera.render()
-      })
-      await websocket.send(response)
+      }
+      if frame % 2 == 0:
+        response["data"] = camera.proccess(done_server)
+      await websocket.send(json.dumps(response))
   except (websockets.exceptions.ConnectionClosedOK, OSError, websockets.exceptions.ConnectionClosedError):
     log.log(websocket, "Going away:", data["username"])
   except:

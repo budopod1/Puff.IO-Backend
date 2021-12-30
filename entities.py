@@ -128,7 +128,7 @@ class Player(Entity):
 
       camera_size = self.user.camera.size
       self.state.get_server(self.server).tilemap.view(self.x, self.y, camera_size, camera_size * 3)
-      
+
       self.user.camera.x = self.x
       self.user.camera.y = self.y
   
