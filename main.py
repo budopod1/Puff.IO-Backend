@@ -74,7 +74,7 @@ def save_continuously():
     if shutdown:
       return
     save_state(state)
-    sleep(10)
+    sleep(60)
 
 
 async def main(websocket, path):
@@ -175,13 +175,14 @@ async def main(websocket, path):
         return
       
       user = state.users[data["username"]]
-      camera = user.camera.render()
+      camera = user.camera
       done_server = done_servers[user.server]
-      await websocket.send(json.dumps({
+      response = json.dumps({
         "type": "frame",
-        "data": done_server,
-        "camera": camera
-      }))
+        "data": camera.proccess(done_server),
+        "camera": camera.render()
+      })
+      await websocket.send(response)
   except (websockets.exceptions.ConnectionClosedOK, OSError, websockets.exceptions.ConnectionClosedError):
     log.log(websocket, "Going away:", data["username"])
   except:

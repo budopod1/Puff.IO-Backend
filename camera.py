@@ -7,6 +7,16 @@ class Camera:
   def render(self):
     return {"x": self.x, "y": self.y, "size": self.size}
   
+  def proccess(self, data):
+    background = data["background"]
+    images = data["images"]
+    new_images = []
+    for image in images:
+      if abs(image["x"] - self.x) < self.size * 1.5 + image["size"]:
+        if abs(image["y"] - self.y) < self.size / 2 + image["size"]:
+          new_images.append(image)
+    return {"background": background, "images": new_images}
+  
   def save(self):
     return self.render()
   

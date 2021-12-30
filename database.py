@@ -2,6 +2,7 @@ import json
 from replit import db as _db
 from time import sleep
 from threading import Thread
+import requests
 
 _database = {}
 upload_continuously_thread = None
@@ -18,7 +19,10 @@ def db():
 
 
 def upload_database():
-  _db["database"] = json.dumps(_database)
+  try:
+    _db["database"] = json.dumps(_database)
+  except requests.HTTPError:
+    upload_database()
 
 
 def _download_database():
@@ -52,4 +56,4 @@ def reset_database():
       del _db[key]
 
 
-reset_database()
+# reset_database()
